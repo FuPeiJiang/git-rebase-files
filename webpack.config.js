@@ -24,7 +24,9 @@ const config = {
   },
   plugins: [new CopyPlugin({
     patterns: [
-      { from: './node_modules/shelljs/src/exec-child.js', to: '' }
+      { from: './node_modules/shelljs/src/exec-child.js', to: '' },
+      { from: './node_modules/trash/lib/windows-trash.exe', to: '' },
+      { from: './node_modules/trash/lib/macos-trash', to: '' }
     ]
   })],
   resolve: {
