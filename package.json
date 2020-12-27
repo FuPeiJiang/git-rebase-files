@@ -2,9 +2,14 @@
 	"name": "git-rebase-files",
 	"displayName": "git rebase files",
 	"description": "add,edit,remove files from past commits",
+	"publisher": "FuPeiJiang",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.52.0"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/FuPeiJiang/git-rebase-files"
 	},
 	"categories": [
 		"Other"
@@ -12,11 +17,13 @@
 	"activationEvents": [
 		"onCommand:git-rebase-files.add-staged-to-past-commit",
 		"onCommand:git-rebase-files.stash-staged-only",
-		"onCommand:git-rebase-files.edit-past-commit"
+		"onCommand:git-rebase-files.edit-past-commit",
+		"onCommand:git-rebase-files.gitlens_interactive-rebase"
 	],
 	"main": "./extension.js",
 	"contributes": {
-		"commands": [{
+		"commands": [
+			{
 				"command": "git-rebase-files.add-staged-to-past-commit",
 				"title": "git-rebase-files: add staged to past commit"
 			},
@@ -30,11 +37,16 @@
 			},
 			{
 				"command": "git-rebase-files.commit-and-continue-rebase",
-				"title": "git-rebase-files.commit and continue rebase"
+				"title": "git-rebase-files: commit and continue rebase"
+			},
+			{
+				"command": "git-rebase-files.gitlens_interactive-rebase",
+				"title": "git-rebase-files: gitlens interactive rebase"
 			}
 		]
 	},
 	"scripts": {
+		"package": "vsce package",
 		"lint": "eslint .",
 		"pretest": "yarn run lint",
 		"test": "node ./test/runTest.js"
@@ -48,6 +60,7 @@
 		"glob": "^7.1.6",
 		"mocha": "^8.0.1",
 		"typescript": "^3.8.3",
+		"vsce": "^1.83.0",
 		"vscode-test": "^1.4.0"
 	},
 	"dependencies": {

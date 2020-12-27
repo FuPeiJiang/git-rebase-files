@@ -26,7 +26,6 @@ function activate(context) {
 
 	context.subscriptions.push(vscode.commands.registerCommand('git-rebase-files.stash-staged-only', async function () {
 		try {
-
 			const gitRoot = await getGitRoot()
 			if (!gitRoot)
 				return
@@ -244,7 +243,36 @@ function activate(context) {
 			vscode.window.showInformationMessage(strError)
 		}
 	}))
-	function getGitPath() {
+
+	context.subscriptions.push(vscode.commands.registerCommand('git-rebase-files.gitlens_interactive-rebase', async function () {
+		try {
+			const gitRoot = await getGitRoot()
+			if (!gitRoot)
+				return
+
+			const commitId = (await window.showInputBox({ prompt: "commit id" })).slice(0, 7)
+			if (!commitId)
+				throw "no commit id"
+
+			var output
+			
+			// shell.env["GIT_SEQUENCE_EDITOR"] = 'code -w'
+			shell.env["GIT_SEQUENCE_EDITOR"] = 'code -w -n'
+			// shell.env["EDITOR"] = "'code -w'"
+
+			console.log(`git rebase --interactive "${commitId}^"`);
+			output = child_process.execSync(`git rebase --interactive "${commitId}^"`, { cwd: gitRoot })
+			// output = shell.exec(`git rebase --interactive "${commitId}^"`, { cwd: gitRoot })
+			// if (output.code === 0) { p(output) } else { return }
+			p(output)
+		} catch (error) {
+			const strError = error.toString()
+			console.log(strError)
+			vscode.window.showInformationMessage(strError)
+		}
+	}))
+
+	/* function getGitPath() {
 		if (isWin) {
 			// const whereGit = child_process.execSync('where git').toString()
 			// const whereGit = child_process.execSync('where git').toString().slice(0, -1)
@@ -257,7 +285,7 @@ function activate(context) {
 			return whichGit.slice(0, -1)
 			//  child_process.execSync('which git').toString().slice(0, -1)
 		}
-	}
+	} */
 }
 
 // this method is called when your extension is deactivated
