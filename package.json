@@ -20,7 +20,7 @@
 		"onCommand:git-rebase-files.edit-past-commit",
 		"onCommand:git-rebase-files.gitlens_interactive-rebase"
 	],
-	"main": "./dist/extension.js",
+	"main": "./extension.js",
 	"contributes": {
 		"commands": [
 			{

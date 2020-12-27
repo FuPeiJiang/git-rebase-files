@@ -20,6 +20,7 @@ function activate(context) {
 	// p(shell.which('node').toString())
 	shell.config.execPath = shell.which('node').toString()
 	var savedGitRoot, savedCommitId
+	var notTerminalExist = true, terminal
 	// const isWin = process.platform === "win32"
 	// const gitPath = getGitPath()
 	// const gitBashPath = '"' + path.join(path.dirname(path.dirname(gitPath)), "git-bash") + '"'
@@ -178,13 +179,13 @@ function activate(context) {
 
 			var output
 			shell.env["GIT_SEQUENCE_EDITOR"] = `sed -i -re 's/^pick ${commitId}/e ${commitId}/'`
-			console.log(`sed -i -re 's/^pick ${commitId}/e ${commitId}/'`);
+			console.log(`sed -i -re 's/^pick ${commitId}/e ${commitId}/'`)
 			output = shell.exec(`git rebase -i "${commitId}^"`, { cwd: gitRoot })
 			if (output.code === 0) { p(output) } else { return }
-// 
+			// 
 			output = shell.exec(`git checkout "${commitId}"`, { cwd: gitRoot })
 			if (output.code === 0) { p(output) } else { return }
-// 
+			// 
 			output = shell.exec(`git reset --soft "${commitId}^"`, { cwd: gitRoot })
 			if (output.code === 0) { p(output) } else { return }
 
@@ -255,16 +256,26 @@ function activate(context) {
 				throw "no commit id"
 
 			var output
-			
+
 			// shell.env["GIT_SEQUENCE_EDITOR"] = 'code -w'
-			shell.env["GIT_SEQUENCE_EDITOR"] = `code -w -n`
+			// shell.env["GIT_SEQUENCE_EDITOR"] = `code -w -n`
 			// shell.env["EDITOR"] = "'code -w'"
 
 			// console.log(`git rebase --interactive "${commitId}^"`);
 			// output = 
-			child_process.execSync(`git rebase --interactive "${commitId}^"`, { cwd: gitRoot })
+			// child_process.execSync(`git rebase --interactive "${commitId}^"`, { cwd: gitRoot })
 			// output = shell.exec(`git rebase --interactive "${commitId}^"`, { cwd: gitRoot })
 			// if (output.code === 0) { p(output) } else { return }
+
+
+			if (notTerminalExist) {
+				notTerminalExist = false
+				terminal = vscode.window.createTerminal("Code")
+			}
+			terminal.sendText(`cd "${gitRoot}"`)
+			terminal.sendText(`git rebase --interactive "${commitId}^"`)
+
+
 		} catch (error) {
 			const strError = error.toString()
 			console.log(strError)
