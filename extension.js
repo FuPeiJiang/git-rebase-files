@@ -202,40 +202,13 @@ function activate(context) {
 			vscode.window.showInformationMessage(strError)
 		}
 	}))
-
-	/* function getGitPath() {
-		if (isWin) {
-			// const whereGit = child_process.execSync('where git').toString()
-			// const whereGit = child_process.execSync('where git').toString().slice(0, -1)
-			// const whereGit = child_process.execSync('where git').toString().slice(0, -2)
-			const whereGit = child_process.execSync('where git').toString()
-			return whereGit.slice(0, whereGit.indexOf("\n") - 1)
-		} else {
-			const whichGit = child_process.execSync('which git').toString()
-			// console.log(whichGit.slice(0,-1))
-			return whichGit.slice(0, -1)
-			//  child_process.execSync('which git').toString().slice(0, -1)
-		}
-	} */
 }
 
-// this method is called when your extension is deactivated
 function deactivate() { }
 
 module.exports = {
 	activate,
 	deactivate
-}
-/* exec('cat *.js missing_file | wc -l', (error, stdout, stderr) => {
-	if (error) {
-	  console.error(`exec error: ${error}`);
-	  return;
-	}
-	console.log(`stdout: ${stdout}`);
-	console.error(`stderr: ${stderr}`);
-  }); */
-function sleep(ms) {
-	return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 function getGitRoot() {
@@ -262,21 +235,7 @@ function getGitRoot() {
 					return
 				}
 			}
-
-			// const gitRoot = 
 			resolve(child_process.execSync('git rev-parse --show-toplevel', { cwd: dirToCheck }).toString().slice(0, -1))
-
-			// child_process.exec('git rev-parse --show-toplevel', { cwd: dirToCheck }, (error, stdout) => {
-			// if (error) {
-			// console.error(`exec error: ${error}`)
-			// resolve(false)
-			// }
-			// const gitRoot = stdout.slice(0, -1)
-			// 
-			// resolve(gitRoot)
-			// })
-
-
 		} catch (error) {
 			const strError = error.toString()
 			if (strError.includes("Error: ENOENT: no such file or directory")) {
@@ -287,14 +246,5 @@ function getGitRoot() {
 			console.log(strError)
 			resolve(false)
 		}
-
 	})
-
-
 }
-
-
-// function p(toPrint) {
-	// console.log(toPrint)
-	// vscode.window.showInformationMessage(toPrint)
-// }
