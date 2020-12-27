@@ -257,14 +257,14 @@ function activate(context) {
 			var output
 			
 			// shell.env["GIT_SEQUENCE_EDITOR"] = 'code -w'
-			shell.env["GIT_SEQUENCE_EDITOR"] = 'code -w -n'
+			shell.env["GIT_SEQUENCE_EDITOR"] = `code -w -n`
 			// shell.env["EDITOR"] = "'code -w'"
 
-			console.log(`git rebase --interactive "${commitId}^"`);
-			output = child_process.execSync(`git rebase --interactive "${commitId}^"`, { cwd: gitRoot })
+			// console.log(`git rebase --interactive "${commitId}^"`);
+			// output = 
+			child_process.execSync(`git rebase --interactive "${commitId}^"`, { cwd: gitRoot })
 			// output = shell.exec(`git rebase --interactive "${commitId}^"`, { cwd: gitRoot })
 			// if (output.code === 0) { p(output) } else { return }
-			p(output)
 		} catch (error) {
 			const strError = error.toString()
 			console.log(strError)
