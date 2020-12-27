@@ -37,8 +37,9 @@ function activate(context) {
 
 			var output
 			// if (shell.exec('git stash --keep-index --include-untracked').code !== 0) {return}
-			p(shell.exec('git config --global user.email', { cwd: gitRoot }))
-			return
+
+			// p(shell.exec('git config --global user.email', { cwd: gitRoot }))
+			// return
 
 			output = shell.exec('git stash --keep-index --include-untracked', { cwd: gitRoot })
 			if (output.code === 0) { p(output) } else { return }
@@ -224,7 +225,7 @@ function activate(context) {
 
 
 
-			output = shell.exec(`git commit -C ${savedCommitId}`, { cwd: savedGitRoot })
+			output = shell.exec(`git commit -C "${savedCommitId}"`, { cwd: savedGitRoot })
 			if (output.code === 0) { p(output) } else { return }
 
 			output = shell.exec(`git rebase --continue`, { cwd: savedGitRoot })
