@@ -10,19 +10,27 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:git-rebase-files.helloWorld",
-		"onCommand:git-rebase-files.stash-staged-only"
+		"onCommand:git-rebase-files.add-staged-to-past-commit",
+		"onCommand:git-rebase-files.stash-staged-only",
+		"onCommand:git-rebase-files.edit-past-commit"
 	],
 	"main": "./extension.js",
 	"contributes": {
-		"commands": [
-			{
-				"command": "git-rebase-files.helloWorld",
-				"title": "Hello World"
+		"commands": [{
+				"command": "git-rebase-files.add-staged-to-past-commit",
+				"title": "git-rebase-files: add staged to past commit"
 			},
 			{
 				"command": "git-rebase-files.stash-staged-only",
 				"title": "git-rebase-files: stash staged only"
+			},
+			{
+				"command": "git-rebase-files.edit-past-commit",
+				"title": "git-rebase-files: edit past commit"
+			},
+			{
+				"command": "git-rebase-files.commit-and-continue-rebase",
+				"title": "git-rebase-files.commit and continue rebase"
 			}
 		]
 	},

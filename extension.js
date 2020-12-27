@@ -17,38 +17,42 @@ const trash = require('trash')
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
-	p(shell.which('node').toString())
+	// p(shell.which('node').toString())
 	shell.config.execPath = shell.which('node').toString()
-
+	var savedGitRoot, savedCommitId
 	// const isWin = process.platform === "win32"
 	// const gitPath = getGitPath()
 	// const gitBashPath = '"' + path.join(path.dirname(path.dirname(gitPath)), "git-bash") + '"'
 
 	context.subscriptions.push(vscode.commands.registerCommand('git-rebase-files.stash-staged-only', async function () {
-		// return
 		try {
 
 			const gitRoot = await getGitRoot()
 			if (!gitRoot)
 				return
 
+			const stashMessage = await window.showInputBox({ prompt: "please put a stash message" })
+
 			// p(shell.exec('git diff', { cwd: gitRoot }))
 
 			var output
 			// if (shell.exec('git stash --keep-index --include-untracked').code !== 0) {return}
+			p(shell.exec('git config --global user.email', { cwd: gitRoot }))
+			return
 
-			// output = shell.exec('git stash --keep-index --include-untracked', { cwd: gitRoot })
-			// if (output.code === 0) { p(output) } else { return }
-			// output = shell.exec('git stash push -m "good stash"', { cwd: gitRoot })
-			// if (output.code === 0) { p(output) } else { return }
-			// output = shell.exec('git stash apply "stash@{1}"', { cwd: gitRoot })
-			// if (output.code === 0) { p(output) } else { return }
-			// output = shell.exec(`git stash show -p stash@{0} --name-only | xargs -I {} git checkout -- "{}"`, { cwd: gitRoot })
-			// if (output.code === 0) { p(output) } else { return }
+			output = shell.exec('git stash --keep-index --include-untracked', { cwd: gitRoot })
+			if (output.code === 0) { p(output) } else { return }
+			if (stashMessage) {
+				output = shell.exec(`git stash push -m "${stashMessage}"`, { cwd: gitRoot })
+			} else {
+				output = shell.exec('git stash push -m "staged stash"', { cwd: gitRoot })
+			}
+			if (output.code === 0) { p(output) } else { return }
+			output = shell.exec('git stash apply "stash@{1}" --index', { cwd: gitRoot })
+			if (output.code === 0) { p(output) } else { return }
 
-
-			dropIndex()
-
+			//attention, this is async
+			dropIndex() //we can do this since we stashed our stuff
 
 
 			console.log("done")
@@ -66,44 +70,44 @@ function activate(context) {
 			console.log(output)
 
 			async function dropIndex() {
+				var output
 				// output = shell.exec(`git diff --name-only`, { cwd: gitRoot })
 				output = shell.exec(`git diff --name-only --cached`, { cwd: gitRoot })
 				// output = shell.exec(`git diff --name-only --cached | xargs -d '\\n' sh -c 'for arg do echo "$arg"; cd "$arg"; done' _`, { cwd: gitRoot })
 				// output = shell.exec(`printf "a\\nb" | xargs sh -c 'for arg do echo "\$arg"; cd "\$arg"; done' _`, { cwd: gitRoot })
-	
+
 				// console.log(`printf "a\\nb" | xargs -d \$'\n' sh -c 'for arg do echo "\$arg"; cd "\$arg"; done' _`, { cwd: gitRoot });
 				const staged = output.slice(0, -1)
 				if (output.code === 0) { p(staged) } else { return }
 				var length, i
-	
-	
+
 				if (!staged) {
 					throw "nothing staged"
 				}
-	
+
 				const stagedAr = staged.split('\n')
 				length = stagedAr.length
-	
+
 				const untracked = shell.exec(`git diff --cached --name-only --diff-filter=A`, { cwd: gitRoot })
 				if (output.code === 0) { p(output) } else { return }
 				const untrackedAr = untracked.slice(0, -1).split('\n')
-	
+
 				console.log("untrackedAr", untrackedAr)
 				console.log("stagedAr", stagedAr)
-	
+
 				for (i = 0; i < length; i++) {
 					const relativePath = stagedAr[i]
 					// p("ok", stagedAr[i])
 					output = shell.exec(`git reset HEAD`, { cwd: gitRoot })
 					if (output.code === 0) { p(output) } else { return }
-	
+
 					if (untrackedAr.includes(relativePath)) {
 						//reeeeeeeeeeeeeeeeeeeeeeeeeee
-	
+
 						await trash(path.join(gitRoot, relativePath))
 						console.log(path.join(gitRoot, relativePath))
 					} else {
-						console.log(`git checkout -- "${relativePath}"`);
+						console.log(`git checkout -- "${relativePath}"`)
 						output = shell.exec(`git checkout -- "${relativePath}"`, { cwd: gitRoot })
 						if (output.code === 0) { p(output) } else { return }
 					}
@@ -114,20 +118,76 @@ function activate(context) {
 			console.log(strError)
 			vscode.window.showInformationMessage(strError)
 		}
-		
+
 	}))
 
-	context.subscriptions.push(vscode.commands.registerCommand('git-rebase-files.helloWorld', async function () {
-		// return
+	context.subscriptions.push(vscode.commands.registerCommand('git-rebase-files.add-staged-to-past-commit', async function () {
 		try {
-
 			const gitRoot = await getGitRoot()
 			if (!gitRoot)
 				return
 
-			const commitId = await window.showInputBox({ prompt: "commit id" })
+
+
+			const commitId = (await window.showInputBox({ prompt: "commit id" })).slice(0, 7)
 			if (!commitId)
 				throw "no commit id"
+
+
+			console.log((commitId))
+
+			var output
+			// output = shell.exec(`git commit --fixup=${commitId}`, { cwd: gitRoot })
+			// if (output.code === 0) { p(output) } else { return }
+
+			// console.log(`GIT_SEQUENCE_EDITOR=true git rebase --interactive --autosquash "${commitId}^"`)
+
+			shell.env["GIT_SEQUENCE_EDITOR"] = "true"
+			output = shell.exec(`git rebase --interactive --autosquash "${commitId}^"`, { cwd: gitRoot })
+			// output = shell.exec(`GIT_SEQUENCE_EDITOR="true" git rebase --interactive --autosquash "${commitId}^"`, { cwd: gitRoot })
+			if (output.code === 0) { p(output) } else { return }
+
+
+			// var repoName
+			// var lastSlash = gitRoot.lastIndexOf('/')
+			// if (lastSlash != -1) {
+			// repoName = gitRoot.slice(lastSlash + 1)
+			// } else {
+			// vscode.window.showInformationMessage("path is not a dir and has no parent dir")
+			// return
+			// }
+		} catch (error) {
+			const strError = error.toString()
+			console.log(strError)
+			vscode.window.showInformationMessage(strError)
+		}
+	}))
+
+	context.subscriptions.push(vscode.commands.registerCommand('git-rebase-files.edit-past-commit', async function () {
+		try {
+			const gitRoot = await getGitRoot()
+			if (!gitRoot)
+				return
+
+			const commitId = (await window.showInputBox({ prompt: "commit id" })).slice(0, 7)
+			if (!commitId)
+				throw "no commit id"
+
+			savedGitRoot = gitRoot; savedCommitId = commitId
+
+			console.log((commitId))
+
+			var output
+			shell.env["GIT_SEQUENCE_EDITOR"] = `sed -i -re 's/^pick ${commitId}/e ${commitId}/'`
+			console.log(`sed -i -re 's/^pick ${commitId}/e ${commitId}/'`);
+			output = shell.exec(`git rebase -i "${commitId}^"`, { cwd: gitRoot })
+			if (output.code === 0) { p(output) } else { return }
+// 
+			output = shell.exec(`git checkout "${commitId}"`, { cwd: gitRoot })
+			if (output.code === 0) { p(output) } else { return }
+// 
+			output = shell.exec(`git reset --soft "${commitId}^"`, { cwd: gitRoot })
+			if (output.code === 0) { p(output) } else { return }
 
 
 
@@ -139,20 +199,51 @@ function activate(context) {
 			// vscode.window.showInformationMessage("path is not a dir and has no parent dir")
 			// return
 			// }
-
-
-
 		} catch (error) {
 			const strError = error.toString()
 			console.log(strError)
 			vscode.window.showInformationMessage(strError)
 		}
-
-
 	}))
 
+	context.subscriptions.push(vscode.commands.registerCommand('git-rebase-files.commit-and-continue-rebase', async function () {
+		try {
+			if (!savedGitRoot)
+				throw "no savedGitRoot from git-rebase-files.edit-past-commit"
+			if (!savedCommitId)
+				throw "no savedCommitId from git-rebase-files.edit-past-commit"
 
 
+			var output
+			// output = shell.exec(`git commit --fixup=${commitId}`, { cwd: gitRoot })
+			// if (output.code === 0) { p(output) } else { return }
+
+			// console.log(`GIT_SEQUENCE_EDITOR=true git rebase --interactive --autosquash "${commitId}^"`)
+
+
+
+
+
+			output = shell.exec(`git commit -C ${savedCommitId}`, { cwd: savedGitRoot })
+			if (output.code === 0) { p(output) } else { return }
+
+			output = shell.exec(`git rebase --continue`, { cwd: savedGitRoot })
+			if (output.code === 0) { p(output) } else { return }
+
+			// var repoName
+			// var lastSlash = gitRoot.lastIndexOf('/')
+			// if (lastSlash != -1) {
+			// repoName = gitRoot.slice(lastSlash + 1)
+			// } else {
+			// vscode.window.showInformationMessage("path is not a dir and has no parent dir")
+			// return
+			// }
+		} catch (error) {
+			const strError = error.toString()
+			console.log(strError)
+			vscode.window.showInformationMessage(strError)
+		}
+	}))
 	function getGitPath() {
 		if (isWin) {
 			// const whereGit = child_process.execSync('where git').toString()
