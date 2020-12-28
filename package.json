@@ -46,6 +46,7 @@
 		]
 	},
 	"scripts": {
+		"ext": "webpack --mode production && vsce package -o git-rebase-files.vsix && code --install-extension git-rebase-files.vsix",
 		"vsix": "webpack --mode production && vsce package -o git-rebase-files.vsix",
 		"package": "vsce package",
 		"lint": "eslint .",

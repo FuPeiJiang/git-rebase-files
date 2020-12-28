@@ -23,7 +23,8 @@ function activate(context) {
 				return
 
 			const stashMessage = await window.showInputBox({ prompt: "please put a stash message" })
-
+			if (stashMessage === undefined)
+				throw "canceled stash message"
 
 			var output
 
@@ -134,6 +135,9 @@ function activate(context) {
 			savedGitRoot = gitRoot; savedCommitId = commitId
 
 			console.log((commitId))
+
+			output = shell.exec('git stash --include-untracked', { cwd: gitRoot })
+			if (output.code === 0) { p(output) } else { return }
 
 			var output
 			shell.env["GIT_SEQUENCE_EDITOR"] = `sed -i -re 's/^pick ${commitId}/e ${commitId}/'`
