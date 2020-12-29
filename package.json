@@ -15,6 +15,7 @@
 		"Other"
 	],
 	"activationEvents": [
+		"onCommand:git-rebase-files.apply-gitignore",
 		"onCommand:git-rebase-files.add-staged-to-past-commit",
 		"onCommand:git-rebase-files.stash-staged-only",
 		"onCommand:git-rebase-files.edit-past-commit",
@@ -23,6 +24,10 @@
 	"main": "./dist/extension.js",
 	"contributes": {
 		"commands": [
+			{
+				"command": "git-rebase-files.apply-gitignore",
+				"title": "git-rebase-files: apply gitignore"
+			},
 			{
 				"command": "git-rebase-files.add-staged-to-past-commit",
 				"title": "git-rebase-files: add staged to past commit"
@@ -48,7 +53,10 @@
 	"scripts": {
 		"ext": "webpack --mode production && vsce package -o git-rebase-files.vsix && code --install-extension git-rebase-files.vsix",
 		"vsix": "webpack --mode production && vsce package -o git-rebase-files.vsix",
-		"package": "vsce package",
+		"nowebpack": "vsce package -o git-rebase-files.vsix && code --install-extension git-rebase-files.vsix",
+		"dev": "webpack --mode development --watch",
+		"webpack": "webpack --mode production",
+		"package": "vsce package -o git-rebase-files.vsix",
 		"lint": "eslint .",
 		"pretest": "yarn run lint",
 		"test": "node ./test/runTest.js"

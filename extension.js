@@ -16,6 +16,50 @@ function activate(context) {
 	var savedGitRoot, savedCommitId
 	var notTerminalExist = true, terminal
 
+	context.subscriptions.push(vscode.commands.registerCommand('git-rebase-files.apply-gitignore', async function () {
+		try {
+			const gitRoot = await getGitRoot()
+			if (!gitRoot)
+				return
+
+			//check if there are changes
+
+			// git diff --cached --name-only
+			// git diff --untracked --name-only
+			var output
+
+			areThereUncomitted()
+
+			output = shell.exec('git rm -r --cached .', { cwd: gitRoot })
+			if (output.code === 0) { p(output) } else { return }
+
+			output = shell.exec('git add .', { cwd: gitRoot })
+			if (output.code === 0) { p(output) } else { return }
+
+			function areThereUncomitted() {
+
+				output = shell.exec('git ls-files --other --directory --exclude-standard', { cwd: gitRoot })
+				if (output.code === 0) { p(output) } else { return }
+				if (output.toString() !== "") {
+					throw "uncommitted changes: " + output
+				}
+
+				output = shell.exec('git update-index --refresh', { cwd: gitRoot })
+				if (output.code === 0) { p(output) } else { throw "uncommitted unstaged changes" }
+
+
+				output = shell.exec('git diff-index --quiet HEAD --', { cwd: gitRoot })
+				if (output.code === 0) { p(output) } else { throw "uncommitted changes in index" }
+
+			}
+
+		} catch (error) {
+			const strError = error.toString()
+			console.log(strError)
+			vscode.window.showInformationMessage(strError)
+		}
+	}))
+
 	context.subscriptions.push(vscode.commands.registerCommand('git-rebase-files.stash-staged-only', async function () {
 		try {
 			const gitRoot = await getGitRoot()
@@ -91,7 +135,6 @@ function activate(context) {
 			console.log(strError)
 			vscode.window.showInformationMessage(strError)
 		}
-
 	}))
 
 	context.subscriptions.push(vscode.commands.registerCommand('git-rebase-files.add-staged-to-past-commit', async function () {
