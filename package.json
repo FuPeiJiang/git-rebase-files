@@ -18,13 +18,13 @@
 		"onCommand:git-rebase-files.apply-gitignore",
 		"onCommand:git-rebase-files.add-staged-to-past-commit",
 		"onCommand:git-rebase-files.stash-staged-only",
+		"onCommand:git-rebase-files.stash-unstaged-only",
 		"onCommand:git-rebase-files.edit-past-commit",
 		"onCommand:git-rebase-files.gitlens_interactive-rebase"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
-		"commands": [
-			{
+		"commands": [{
 				"command": "git-rebase-files.apply-gitignore",
 				"title": "git-rebase-files: apply gitignore"
 			},
@@ -35,6 +35,10 @@
 			{
 				"command": "git-rebase-files.stash-staged-only",
 				"title": "git-rebase-files: stash staged only"
+			},
+			{
+				"command": "git-rebase-files.stash-unstaged-only",
+				"title": "git-rebase-files: stash unstaged only"
 			},
 			{
 				"command": "git-rebase-files.edit-past-commit",

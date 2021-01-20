@@ -137,6 +137,30 @@ function activate(context) {
 		}
 	}))
 
+	context.subscriptions.push(vscode.commands.registerCommand('git-rebase-files.stash-unstaged-only', async function () {
+		try {
+			const gitRoot = await getGitRoot()
+			if (!gitRoot)
+				return
+
+			var output
+
+			output = shell.exec('git commit --message "WIP"', { cwd: gitRoot })
+			if (output.code === 0) { p(output) } else { return }
+
+			output = shell.exec('git stash -u', { cwd: gitRoot })
+			if (output.code === 0) { p(output) } else { return }
+
+			output = shell.exec('git reset --soft HEAD^', { cwd: gitRoot })
+			if (output.code === 0) { p(output) } else { return }
+
+		} catch (error) {
+			const strError = error.toString()
+			console.log(strError)
+			vscode.window.showInformationMessage(strError)
+		}
+	}))
+
 	context.subscriptions.push(vscode.commands.registerCommand('git-rebase-files.add-staged-to-past-commit', async function () {
 		try {
 			const gitRoot = await getGitRoot()
