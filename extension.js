@@ -151,7 +151,7 @@ function activate(context) {
 			output = shell.exec('git stash -u', { cwd: gitRoot })
 			if (output.code === 0) { p(output) } else { return }
 
-			output = shell.exec('git reset --soft HEAD^', { cwd: gitRoot })
+			output = shell.exec('git reset --soft "HEAD^"', { cwd: gitRoot })
 			if (output.code === 0) { p(output) } else { return }
 
 		} catch (error) {
