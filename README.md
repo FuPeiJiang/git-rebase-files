@@ -5,9 +5,10 @@ I say changes, not files, because you can remove a file deletion, which is delet
 staged changes, added changes, cached changes are synonyms
 
 # Features:
-1. stash only staged
+1. stash only staged, stash only unstaged
 2. add staged to a past commit (by id) (only use this command to add, or else conflict)
-3. remove staged (edit a past commit)<br>
+3. edit a past commit, commit and continue rebase<br>
+<!-- 3. remove staged (edit a past commit)<br> -->
 ##### most complicated:
 4. move changes from `commitA` to `commitB`<br>
 split `commitA` in 2 commits, then squash the one you want under or onto `commitB`
