@@ -168,7 +168,6 @@ function activate(context) {
 				return
 
 
-
 			const commitId = (await window.showInputBox({ prompt: "commit id" })).slice(0, 7)
 			if (!commitId)
 				throw "no commit id"
@@ -177,6 +176,8 @@ function activate(context) {
 			console.log((commitId))
 
 			var output
+			output = shell.exec(`git commit --fixup=${commitId}`, { cwd: gitRoot })
+			if (output.code === 0) { p(output) } else { return }
 
 			shell.env["GIT_SEQUENCE_EDITOR"] = "true"
 			output = shell.exec(`git rebase --interactive --autosquash "${commitId}^"`, { cwd: gitRoot })
