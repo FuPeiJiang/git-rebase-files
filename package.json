@@ -24,7 +24,8 @@
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
-		"commands": [{
+		"commands": [
+			{
 				"command": "git-rebase-files.apply-gitignore",
 				"title": "git-rebase-files: apply gitignore"
 			},
@@ -71,7 +72,7 @@
 		"@types/node": "^14.0.27",
 		"@types/vscode": "^1.52.0",
 		"copy-webpack-plugin": "^7.0.0",
-		"eslint": "^7.6.0",
+		"eslint": "^7.18.0",
 		"glob": "^7.1.6",
 		"mocha": "^8.0.1",
 		"ts-loader": "^8.0.12",
