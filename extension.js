@@ -2,7 +2,6 @@ const vscode = require('vscode')
 const window = vscode.window
 const fs = require('fs')
 const child_process = require('child_process')
-const { get } = require('https')
 const path = require('path')
 const shell = require('shelljs')
 const p = console.log.bind(console)
@@ -26,9 +25,9 @@ function activate(context) {
 
       // git diff --cached --name-only
       // git diff --untracked --name-only
-      var output
+      let output
 
-      areThereUncomitted()
+      areThereUncomitted(gitRoot)
 
       output = shell.exec('git rm -r --cached .', { cwd: gitRoot })
       if (output.code === 0) { p(output) } else { return }
@@ -36,22 +35,7 @@ function activate(context) {
       output = shell.exec('git add .', { cwd: gitRoot })
       if (output.code === 0) { p(output) } else { return }
 
-      function areThereUncomitted() {
 
-        output = shell.exec('git ls-files --other --directory --exclude-standard', { cwd: gitRoot })
-        if (output.code === 0) { p(output) } else { return }
-        if (output.toString() !== '') {
-          throw `uncommitted changes: ${output}`
-        }
-
-        output = shell.exec('git update-index --refresh', { cwd: gitRoot })
-        if (output.code === 0) { p(output) } else { throw 'uncommitted unstaged changes' }
-
-
-        output = shell.exec('git diff-index --quiet HEAD --', { cwd: gitRoot })
-        if (output.code === 0) { p(output) } else { throw 'uncommitted changes in index' }
-
-      }
 
     } catch (error) {
       const strError = error.toString()
@@ -84,52 +68,9 @@ function activate(context) {
       if (output.code === 0) { p(output) } else { return }
 
       //attention, this is async
-      dropIndex() //we can do this since we stashed our stuff
+      dropIndex(gitRoot) //we can do this since we stashed our stuff
 
-      async function dropIndex() {
-        var output
-        // output = shell.exec(`git diff --name-only`, { cwd: gitRoot })
-        output = shell.exec('git diff --name-only --cached', { cwd: gitRoot })
-        // output = shell.exec(`git diff --name-only --cached | xargs -d '\\n' sh -c 'for arg do echo "$arg"; cd "$arg"; done' _`, { cwd: gitRoot })
-        // output = shell.exec(`printf "a\\nb" | xargs sh -c 'for arg do echo "\$arg"; cd "\$arg"; done' _`, { cwd: gitRoot })
 
-        // console.log(`printf "a\\nb" | xargs -d \$'\n' sh -c 'for arg do echo "\$arg"; cd "\$arg"; done' _`, { cwd: gitRoot });
-        const staged = output.slice(0, -1)
-        if (output.code === 0) { p(staged) } else { return }
-        var length, i
-
-        if (!staged) {
-          throw 'nothing staged'
-        }
-
-        const stagedAr = staged.split('\n')
-        length = stagedAr.length
-
-        const untracked = shell.exec('git diff --cached --name-only --diff-filter=A', { cwd: gitRoot })
-        if (output.code === 0) { p(output) } else { return }
-        const untrackedAr = untracked.slice(0, -1).split('\n')
-
-        console.log('untrackedAr', untrackedAr)
-        console.log('stagedAr', stagedAr)
-
-        for (i = 0; i < length; i++) {
-          const relativePath = stagedAr[i]
-          // p("ok", stagedAr[i])
-          output = shell.exec('git reset HEAD', { cwd: gitRoot })
-          if (output.code === 0) { p(output) } else { return }
-
-          if (untrackedAr.includes(relativePath)) {
-            //reeeeeeeeeeeeeeeeeeeeeeeeeee
-
-            await trash(path.join(gitRoot, relativePath))
-            console.log(path.join(gitRoot, relativePath))
-          } else {
-            console.log(`git checkout -- "${relativePath}"`)
-            output = shell.exec(`git checkout -- "${relativePath}"`, { cwd: gitRoot })
-            if (output.code === 0) { p(output) } else { return }
-          }
-        }
-      }
     } catch (error) {
       const strError = error.toString()
       console.log(strError)
@@ -317,4 +258,66 @@ function getGitRoot() {
       resolve(false)
     }
   })
+}
+
+function areThereUncomitted(gitRoot) {
+
+  let output = shell.exec('git ls-files --other --directory --exclude-standard', { cwd: gitRoot })
+  if (output.code === 0) { p(output) } else { return }
+  if (output.toString() !== '') {
+    throw `uncommitted changes: ${output}`
+  }
+
+  output = shell.exec('git update-index --refresh', { cwd: gitRoot })
+  if (output.code === 0) { p(output) } else { throw 'uncommitted unstaged changes' }
+
+
+  output = shell.exec('git diff-index --quiet HEAD --', { cwd: gitRoot })
+  if (output.code === 0) { p(output) } else { throw 'uncommitted changes in index' }
+
+}
+
+async function dropIndex(gitRoot) {
+  var output
+  // output = shell.exec(`git diff --name-only`, { cwd: gitRoot })
+  output = shell.exec('git diff --name-only --cached', { cwd: gitRoot })
+  // output = shell.exec(`git diff --name-only --cached | xargs -d '\\n' sh -c 'for arg do echo "$arg"; cd "$arg"; done' _`, { cwd: gitRoot })
+  // output = shell.exec(`printf "a\\nb" | xargs sh -c 'for arg do echo "\$arg"; cd "\$arg"; done' _`, { cwd: gitRoot })
+
+  // console.log(`printf "a\\nb" | xargs -d \$'\n' sh -c 'for arg do echo "\$arg"; cd "\$arg"; done' _`, { cwd: gitRoot });
+  const staged = output.slice(0, -1)
+  if (output.code === 0) { p(staged) } else { return }
+  var length, i
+
+  if (!staged) {
+    throw 'nothing staged'
+  }
+
+  const stagedAr = staged.split('\n')
+  length = stagedAr.length
+
+  const untracked = shell.exec('git diff --cached --name-only --diff-filter=A', { cwd: gitRoot })
+  if (output.code === 0) { p(output) } else { return }
+  const untrackedAr = untracked.slice(0, -1).split('\n')
+
+  console.log('untrackedAr', untrackedAr)
+  console.log('stagedAr', stagedAr)
+
+  for (i = 0; i < length; i++) {
+    const relativePath = stagedAr[i]
+    // p("ok", stagedAr[i])
+    output = shell.exec('git reset HEAD', { cwd: gitRoot })
+    if (output.code === 0) { p(output) } else { return }
+
+    if (untrackedAr.includes(relativePath)) {
+      //reeeeeeeeeeeeeeeeeeeeeeeeeee
+
+      await trash(path.join(gitRoot, relativePath))
+      console.log(path.join(gitRoot, relativePath))
+    } else {
+      console.log(`git checkout -- "${relativePath}"`)
+      output = shell.exec(`git checkout -- "${relativePath}"`, { cwd: gitRoot })
+      if (output.code === 0) { p(output) } else { return }
+    }
+  }
 }
