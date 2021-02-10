@@ -14,8 +14,7 @@ const trash = require('trash')
  */
 function activate(context) {
   shell.config.execPath = shell.which('node').toString()
-  var savedGitRoot, savedCommitId
-  var notTerminalExist = true, terminal
+  let savedGitRoot, savedCommitId, notTerminalExist = true, terminal
 
   context.subscriptions.push(vscode.commands.registerCommand('git-rebase-files.apply-gitignore', async function () {
     try {
@@ -56,7 +55,7 @@ function activate(context) {
       if (stashMessage === undefined)
         throw 'canceled stash message'
 
-      var output
+      let output
 
       output = shell.exec('git stash --keep-index --include-untracked', { cwd: gitRoot })
       if (output.code === 0) { p(output) } else { return }
@@ -86,7 +85,7 @@ function activate(context) {
       if (!gitRoot)
         return
 
-      var output
+      let output
 
       output = shell.exec('git commit --message "WIP"', { cwd: gitRoot })
       if (output.code === 0) { p(output) } else { return }
@@ -118,7 +117,7 @@ function activate(context) {
 
       console.log((commitId))
 
-      var output
+      let output
       output = shell.exec(`git commit --fixup=${commitId}`, { cwd: gitRoot })
       if (output.code === 0) { p(output) } else { return }
 
@@ -150,7 +149,7 @@ function activate(context) {
       output = shell.exec('git stash --include-untracked', { cwd: gitRoot })
       if (output.code === 0) { p(output) } else { return }
 
-      var output
+      let output
       shell.env['GIT_SEQUENCE_EDITOR'] = `sed -i -re 's/^pick ${commitId}/e ${commitId}/'`
       console.log(`sed -i -re 's/^pick ${commitId}/e ${commitId}/'`)
       output = shell.exec(`git rebase -i "${commitId}^"`, { cwd: gitRoot })
@@ -176,7 +175,7 @@ function activate(context) {
       if (!savedCommitId)
         throw 'no savedCommitId from git-rebase-files.edit-past-commit'
 
-      var output
+      let output
 
       output = shell.exec(`git commit -C "${savedCommitId}"`, { cwd: savedGitRoot })
       if (output.code === 0) { p(output) } else { return }
@@ -227,7 +226,7 @@ module.exports = {
 async function getGitRoot() {
   try {
     const activeEditor = window.activeTextEditor
-    var fullPath
+    let fullPath
     if (activeEditor) {
       const document = activeEditor.document
 
@@ -278,7 +277,7 @@ function areThereUncomitted(gitRoot) {
 }
 
 async function dropIndex(gitRoot) {
-  var output
+  let output
   // output = shell.exec(`git diff --name-only`, { cwd: gitRoot })
   output = shell.exec('git diff --name-only --cached', { cwd: gitRoot })
   // output = shell.exec(`git diff --name-only --cached | xargs -d '\\n' sh -c 'for arg do echo "$arg"; cd "$arg"; done' _`, { cwd: gitRoot })
@@ -287,7 +286,7 @@ async function dropIndex(gitRoot) {
   // console.log(`printf "a\\nb" | xargs -d \$'\n' sh -c 'for arg do echo "\$arg"; cd "\$arg"; done' _`, { cwd: gitRoot });
   const staged = output.slice(0, -1)
   if (output.code === 0) { p(staged) } else { return }
-  var length, i
+  let length, i
 
   if (!staged) {
     throw 'nothing staged'
