@@ -7,6 +7,9 @@ const CopyPlugin = require('copy-webpack-plugin')
 
 /**@type {import('webpack').Configuration}*/
 const config = {
+  infrastructureLogging: {
+    level: 'log',
+  },
   target: 'node', // vscode extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node/
   node: false,
 

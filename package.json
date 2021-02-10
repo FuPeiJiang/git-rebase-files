@@ -60,6 +60,7 @@
 		"vsix": "webpack --mode production && vsce package -o git-rebase-files.vsix",
 		"nowebpack": "vsce package -o git-rebase-files.vsix && code --install-extension git-rebase-files.vsix",
 		"dev": "webpack --mode development --watch",
+		"watch": "webpack --mode development --watch",
 		"webpack": "webpack --mode production",
 		"package": "vsce package -o git-rebase-files.vsix",
 		"lint": "eslint .",
