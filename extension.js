@@ -1,3 +1,5 @@
+var d = console.debug.bind(console)
+
 const vscode = require('vscode')
 const window = vscode.window
 const fs = require('fs')
@@ -222,42 +224,40 @@ module.exports = {
   deactivate
 }
 
-function getGitRoot() {
-  return new Promise(async (resolve) => {
-    try {
-      const activeEditor = window.activeTextEditor
-      var fullPath
-      if (activeEditor) {
-        const document = activeEditor.document
+async function getGitRoot() {
+  try {
+    const activeEditor = window.activeTextEditor
+    var fullPath
+    if (activeEditor) {
+      const document = activeEditor.document
 
-        fullPath = document.fileName.replace(/\\/g, '/')
-      }
-
-      const input = await window.showInputBox({ value: fullPath, prompt: 'git repo path or subpath' })
-      var dirToCheck, lastSlash
-      if (fs.lstatSync(input).isDirectory()) {
-        dirToCheck = input
-      } else {
-        lastSlash = input.lastIndexOf('/')
-        if (lastSlash != -1) {
-          dirToCheck = input.slice(0, lastSlash + 1)
-        } else {
-          vscode.window.showInformationMessage('path is not a dir and has no parent dir')
-          return
-        }
-      }
-      resolve(child_process.execSync('git rev-parse --show-toplevel', { cwd: dirToCheck }).toString().slice(0, -1))
-    } catch (error) {
-      const strError = error.toString()
-      if (strError.includes('Error: ENOENT: no such file or directory')) {
-        vscode.window.showInformationMessage('path is not a dir and has no parent dir')
-        console.log(strError)
-        return
-      }
-      console.log(strError)
-      resolve(false)
+      fullPath = document.fileName
     }
-  })
+
+    const input = await window.showInputBox({ value: fullPath, prompt: 'git repo path or subpath' })
+    let dirToCheck
+    //lstatSync will throw if doesn't exist
+    const stats = fs.lstatSync(input)
+    if (stats.isDirectory()) {
+      dirToCheck = input
+    } else if (stats.isFile()) {
+      //if isFile, it must have a parent dir, check that.
+      dirToCheck = path.dirname(input)
+    } else {
+      vscode.window.showInformationMessage('file system entry exists, but it\'s not a dir or a file, this is weird')
+      return false
+    }
+    return child_process.execSync('git rev-parse --show-toplevel', { cwd: dirToCheck }).toString().slice(0, -1)
+  } catch (error) {
+    const strError = error.toString()
+    if (strError.includes('Error: ENOENT: no such file or directory')) {
+      vscode.window.showInformationMessage('path is not a dir and has no parent dir')
+    } else {
+      vscode.window.showInformationMessage('not a git repo path or subpath')
+    }
+    console.log(strError)
+    return false
+  }
 }
 
 function areThereUncomitted(gitRoot) {
