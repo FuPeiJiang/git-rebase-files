@@ -145,11 +145,12 @@ function activate(context) {
       savedGitRoot = gitRoot; savedCommitId = commitId
 
       console.log((commitId))
+      
+      let output
 
       output = shell.exec('git stash --include-untracked', { cwd: gitRoot })
       if (output.code === 0) { p(output) } else { return }
 
-      let output
       shell.env['GIT_SEQUENCE_EDITOR'] = `sed -i -re 's/^pick ${commitId}/e ${commitId}/'`
       console.log(`sed -i -re 's/^pick ${commitId}/e ${commitId}/'`)
       output = shell.exec(`git rebase -i "${commitId}^"`, { cwd: gitRoot })
